@@ -1,0 +1,4 @@
+timestamp,model_label,model_name,repetition,wall_seconds,total_duration_s,load_duration_s,prompt_eval_duration_s,eval_duration_s,prompt_tokens,generated_tokens,tokens_per_second,valid_json,valid_schema,error
+2026-11-24T01:04:59.507690,Q2_K,qwen2.5:1.5b-instruct-q2_K,1,14.3682,12.2521,5.7629,2.1952,4.2231,159,116,27.468,True,False,
+2026-11-24T01:05:14.361076,Q4_K_M,qwen2.5:1.5b,1,14.8525,12.7601,4.1456,2.0285,6.5725,159,108,16.432,True,True,
+2026-11-24T01:05:36.436002,Q8_0,qwen2.5:1.5b-instruct-q8_0,1,22.0722,19.9648,6.4685,4.08,9.2814,159,99,10.666,True,True,

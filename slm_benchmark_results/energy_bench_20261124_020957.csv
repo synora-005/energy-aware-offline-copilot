@@ -1,0 +1,4 @@
+model,accept_rate,schema_rate,tokens_per_s,latency_s,net_wh_per_call,joules_per_token,wh_per_accepted,energy_source
+Q2_K,0.0,0.0,26.077 +- 1.153,5.018 +- 0.119,0.0126 +- 0.0021,0.77 +- 0.13,,measured
+Q4_K_M,1.0,1.0,18.255 +- 0.941,7.024 +- 0.245,0.0230 +- 0.0088,1.05 +- 0.40,0.023048369231582325,measured
+Q8_0,0.8333333333333334,1.0,11.713 +- 0.473,9.439 +- 0.333,0.0284 +- 0.0068,1.43 +- 0.34,0.0341344571217166,measured

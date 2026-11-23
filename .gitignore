@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+copilot.db
+cloud.db
+*.db-wal
+*.db-shm
+*_backup.py
+benchmark_slm_energy_old.py

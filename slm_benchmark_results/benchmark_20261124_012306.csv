@@ -1,0 +1,4 @@
+timestamp,model_label,model_name,repetition,wall_seconds,total_duration_s,load_duration_s,prompt_eval_duration_s,eval_duration_s,prompt_tokens,generated_tokens,tokens_per_second,valid_json,valid_schema,factual_valid,factual_problems,error
+2026-11-24T01:23:17.303672,Q2_K,qwen2.5:1.5b-instruct-q2_K,1,10.9357,8.8396,2.604,2.8047,3.3824,273,93,27.496,True,False,False,['Schema validation failed'],
+2026-11-24T01:23:30.146205,Q4_K_M,qwen2.5:1.5b,1,12.8414,10.7838,3.1417,2.7549,4.8734,273,83,17.031,True,True,False,['Missing correct saving value: 0.160'],
+2026-11-24T01:24:11.247842,Q8_0,qwen2.5:1.5b-instruct-q8_0,1,41.0961,38.8143,8.5329,8.174,21.3707,273,78,3.65,True,True,True,[],
