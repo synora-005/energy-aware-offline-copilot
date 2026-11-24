@@ -7,3 +7,4 @@ cloud.db
 *.db-shm
 *_backup.py
 benchmark_slm_energy_old.py
+copilot_before_*.db

@@ -4,6 +4,7 @@
 
 An offline-first energy copilot. It measures the energy of computing workloads, uses a local small language model to explain the results in plain English, proves savings with a reproducible baseline-vs-optimized experiment, and keeps insights in a durable queue that syncs safely when the network returns.
 
+
 ## At a glance
 
 | Item | Value |
@@ -20,12 +21,12 @@ An offline-first energy copilot. It measures the energy of computing workloads, 
 
 ## Measured results (this laptop, unplugged)
 
-Every run is a 300 s window; baseline and optimized share a seed, so they do identical work. Order is ABBA to cancel drift. Statistics are a paired t-test over 5 pairs.
+Every run is a 300 s window; baseline and optimized share a seed, so they do identical work. Order is ABBA to cancel drift. Statistics are a paired t-test over 5 pairs (background) and 7 pairs (batching). All 12 pairs favour the optimized variant.
 
 | Scenario | Baseline | Optimized | Saving | 95% CI of saving | Verdict |
 |---|---|---|---|---|---|
 | Idle/background (**synthetic** chatty app) | 1.100 Wh | 0.940 Wh | 0.160 Wh (14.5%) | 0.061 to 0.258 Wh | distinguishable from noise |
-| Batching (one process per task vs one batched process) | 1.192 Wh | 0.999 Wh | 0.194 Wh (16.2%) | 0.105 to 0.283 Wh | distinguishable from noise |
+| Batching (one process per task vs one batched process, 7 pairs) | 1.218 Wh | 0.990 Wh | 0.228 Wh (18.7%) | 0.131 to 0.326 Wh | distinguishable from noise |
 
 Batching runs prove equivalent work: baseline and optimized produce matching SHA-256 checksums for every seed.
 
@@ -35,7 +36,7 @@ Batching runs prove equivalent work: baseline and optimized produce matching SHA
 - Cost = kWh x tariff (assumed 6.71 currency units per kWh)
 - CO2e = kWh x grid factor (assumed 727 g CO2e per kWh)
 
-For the background scenario: 0.160 / 1000 x 6.71 = 0.00107 currency units and 0.160 / 1000 x 727 = 0.1162 g CO2e per 300 s window.
+Background: 0.160 / 1000 x 6.71 = 0.00107 currency units and 0.160 / 1000 x 727 = 0.1162 g CO2e per 300 s window. Batching: 0.228 Wh gives 0.00153 currency units and 0.1660 g CO2e.
 
 Raw evidence: `evidence_summary.txt`.
 
@@ -54,6 +55,26 @@ Q2_K is cheapest but produced no usable output. Q4_K_M gave 100% verified output
 ### Net savings (the copilot's own cost)
 
 One explanation costs about 0.023 Wh, which is 12 to 14% of the gross saving per window. Break-even is 36 to 43 s of optimized running. This is indicative only (3 repeats, large idle noise). See `net_savings.txt`.
+
+### Predict, apply, verify
+
+`predict.py` stores a saving prediction before a change is applied, then compares it with the measured saving and recalibrates.
+
+- **Model:** average power = a + b x CPU%, fitted on measured runs of the *other* scenarios (the scenario being predicted is excluded). The planned CPU reduction comes from the workload design, not from the optimized runs.
+- **Result (retrospective: the runs already existed, but the model never saw them):**
+
+| Scenario | Predicted | Measured (5 pairs) | Error |
+|---|---|---|---|
+| Background | 0.103 +- 0.023 Wh | 0.160 Wh | +0.057 Wh |
+| Batching | 0.130 +- 0.036 Wh | 0.194 Wh | +0.064 Wh |
+
+- **Finding:** the model underpredicts by about 1.5x because it counts CPU work but not wake-up and process-start overhead. Both measured savings lie inside the prediction's own uncertainty only once the measurement noise is included. A correction factor learned on one scenario cut the other's error to under 0.01 Wh. This uses 2 scenarios, so it is indicative only.
+- **Not yet shown:** a fully prospective test with enough repeats. Two later batching pairs (seeds 110 and 111) were too few to confirm or refute the prediction.
+
+```
+python predict.py demo      # predict + verify both scenarios, show recalibration
+python predict.py show
+```
 
 ## How it works
 
@@ -81,8 +102,10 @@ cd energy-aware-offline-copilot
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python init_db.py
+python demo_db.py load
 ```
+
+`demo_db.py load` copies the measured demo data into `copilot.db` so the dashboard shows results immediately. Add `--force` to replace an existing database.
 
 Download the model once (needs internet; after this everything works offline):
 
@@ -150,6 +173,8 @@ python net_savings.py
 | `mock_cloud.py` | Mock receiver that dedupes by idempotency key |
 | `benchmark_slm_energy.py` | Scenario 3: quantization quality, latency and energy |
 | `net_savings.py` | Saving minus the copilot's own energy |
+| `predict.py` | Predict, apply, verify loop with recalibration |
+| `demo_db.py` | Export and load the clean demo database |
 | `dashboard.py`, `dash_data.py` | Streamlit dashboard |
 | `check_env.py`, `probe_battery.py` | Environment and battery counter checks |
 
@@ -162,8 +187,8 @@ python net_savings.py
 - **Whole-system energy.** The battery measures the whole laptop, so base load dominates and savings are a modest share of the total.
 - **Small samples.** 5 paired repeats for scenarios 1 and 2, 3 repeats for scenario 3 and net savings. The latter is indicative.
 - **Embodied carbon** of the device is not counted.
-- **Assumptions.** Tariff and grid factor are assumptions stored in the database; change them with `set_assumption` in `monitor.py`.
+- **Assumptions.** Tariff 6.71 per kWh (BESCOM residential, excluding tax and fixed charges); grid factor 727 g CO2e/kWh (CEA CO2 Baseline Database v20.0). Both are stored in the database; change them with `set_assumption` in `monitor.py`.
 
 ## Not built yet
 
-Predict-apply-verify loop, tariff and carbon-aware scheduling, self-calibrating power model, testing on other machines.
+A fully prospective predict-apply-verify test with enough repeats, tariff and carbon-aware scheduling, a self-calibrating power model, testing on other machines.
